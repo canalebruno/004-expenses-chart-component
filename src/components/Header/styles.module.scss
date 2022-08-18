@@ -1,0 +1,21 @@
+.container {
+    background-color: var(--softRed);
+    width: 100%;
+    padding: 1.3rem;
+    border-radius: 1rem;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .myBalance {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+
+        .balanceValue {
+            font-weight: bolder;
+            font-size: 1.7rem;
+        }
+    }
+}

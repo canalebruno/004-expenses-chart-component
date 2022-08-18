@@ -1,0 +1,18 @@
+.container {
+    background-color: var(--darkBrown);
+    position: absolute;
+    color: white;
+    z-index: 2;
+    top: -2.5rem;
+    padding: 0.4rem;
+    left: 50%;
+    transform: translate(-50%, 0);
+    border-radius: 0.25rem;
+    display: none;
+}
+
+@media (min-width: 700px) {
+    .container {
+        display: block;
+    }
+}
