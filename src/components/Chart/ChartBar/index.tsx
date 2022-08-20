@@ -4,23 +4,31 @@ import styles from "./styles.module.scss";
 
 interface ChartBarProps {
   label: string;
-  percentage: number;
+  data: {
+    percentage: number;
+    price: number;
+  };
   weekday?: boolean;
 }
 
 export default function ChartBar({
   label,
-  percentage,
+  data,
   weekday = false,
 }: ChartBarProps) {
+  const [isHover, setIsHover] = useState(false);
+  const { percentage, price } = data;
+
   return (
     <div className={styles.container}>
       <div className={styles.barContainer}>
         <div
+          onMouseEnter={() => setIsHover(true)}
+          onMouseLeave={() => setIsHover(false)}
           style={{ height: `${percentage}%` }}
           className={`${styles.bar} ${weekday && styles.active}`}
         >
-          <PriceTag price={10} />
+          {isHover && <PriceTag price={price} />}
         </div>
       </div>
       <p>{label}</p>

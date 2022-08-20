@@ -3,14 +3,19 @@ import styles from "./styles.module.scss";
 import data from "../../../public/data.json";
 import { useEffect, useState } from "react";
 
+type data = {
+  percentage: number;
+  price: number;
+};
+
 export default function Chart() {
-  const [monPercent, setMonPercent] = useState(1);
-  const [tuePercent, setTuePercent] = useState(1);
-  const [wedPercent, setWedPercent] = useState(1);
-  const [thuPercent, setThuPercent] = useState(1);
-  const [friPercent, setFriPercent] = useState(1);
-  const [satPercent, setSatPercent] = useState(1);
-  const [sunPercent, setSunPercent] = useState(1);
+  const [monData, setMonData] = useState({} as data);
+  const [tueData, setTueData] = useState({} as data);
+  const [wedData, setWedData] = useState({} as data);
+  const [thuData, setThuData] = useState({} as data);
+  const [friData, setFriData] = useState({} as data);
+  const [satData, setSatData] = useState({} as data);
+  const [sunData, setSunData] = useState({} as data);
 
   useEffect(() => {
     const sortedData = data.sort((a, b) => {
@@ -34,25 +39,25 @@ export default function Chart() {
     percentages.map((record) => {
       switch (record.day) {
         case "mon":
-          setMonPercent(record.percentage);
+          setMonData({ percentage: record.percentage, price: record.amount });
           break;
         case "tue":
-          setTuePercent(record.percentage);
+          setTueData({ percentage: record.percentage, price: record.amount });
           break;
         case "wed":
-          setWedPercent(record.percentage);
+          setWedData({ percentage: record.percentage, price: record.amount });
           break;
         case "thu":
-          setThuPercent(record.percentage);
+          setThuData({ percentage: record.percentage, price: record.amount });
           break;
         case "fri":
-          setFriPercent(record.percentage);
+          setFriData({ percentage: record.percentage, price: record.amount });
           break;
         case "sat":
-          setSatPercent(record.percentage);
+          setSatData({ percentage: record.percentage, price: record.amount });
           break;
         case "sun":
-          setSunPercent(record.percentage);
+          setSunData({ percentage: record.percentage, price: record.amount });
           break;
       }
     });
@@ -62,13 +67,13 @@ export default function Chart() {
 
   return (
     <div className={styles.container}>
-      <ChartBar weekday={today === 1} percentage={monPercent} label="mon" />
-      <ChartBar weekday={today === 2} percentage={tuePercent} label="tue" />
-      <ChartBar weekday={today === 3} percentage={wedPercent} label="wed" />
-      <ChartBar weekday={today === 4} percentage={thuPercent} label="thu" />
-      <ChartBar weekday={today === 5} percentage={friPercent} label="fri" />
-      <ChartBar weekday={today === 6} percentage={satPercent} label="sat" />
-      <ChartBar weekday={today === 7} percentage={sunPercent} label="sun" />
+      <ChartBar weekday={today === 1} data={monData} label="mon" />
+      <ChartBar weekday={today === 2} data={tueData} label="tue" />
+      <ChartBar weekday={today === 3} data={wedData} label="wed" />
+      <ChartBar weekday={today === 4} data={thuData} label="thu" />
+      <ChartBar weekday={today === 5} data={friData} label="fri" />
+      <ChartBar weekday={today === 6} data={satData} label="sat" />
+      <ChartBar weekday={today === 7} data={sunData} label="sun" />
     </div>
   );
 }
