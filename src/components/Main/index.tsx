@@ -2,19 +2,22 @@ import { useEffect, useState } from "react";
 import styles from "./styles.module.scss";
 
 export default function Main() {
-  const [currentPageWithBleedWidth, setCurrentPageWithBleedWidth] = useState(1);
-  const [currentPageWithBleedHeight, setCurrentPageWithBleedHeight] =
-    useState(1);
-  const [currentPageFinishSizeWidth, setCurrentPageFinishSizeWidth] =
-    useState(1);
-  const [currentPageFinishSizeHeight, setCurrentPageFinishSizeHeight] =
-    useState(1);
-  const [newPageFinishSizeWidth, setNewPageFinishSizeWidth] = useState(1);
-  const [newPageFinishSizeHeight, setNewPageFinishSizeHeight] = useState(1);
-  const [rescaleToWidth, setRescaleToWidth] = useState(1);
-  const [rescaleToHeight, setRescaleToHeight] = useState(1);
-  const [trimboxSizeWidth, setTrimboxSizeWidth] = useState(1);
-  const [trimboxSizeHeight, setTrimboxSizeHeight] = useState(1);
+  const [currentPageWithBleed, setCurrentPageWithBleed] = useState({
+    width: 1,
+    height: 1,
+  });
+  const [currentPageFinishSize, setCurrentPageFinishSize] = useState({
+    width: 1,
+    height: 1,
+  });
+  const [newPageFinishSize, setNewPageFinishSize] = useState({
+    width: 1,
+    height: 1,
+  });
+  const [rescaleTo, setRescaleTo] = useState({ width: 1, height: 1 });
+  const [trimboxSize, setTrimboxSize] = useState({ width: 1, height: 1 });
+  const [currentPageSelection, setCurrentPageSelection] = useState("custom");
+  const [newPageSelection, setNewPageSelection] = useState("custom");
 
   const standardSizes = [
     {
@@ -57,29 +60,40 @@ export default function Main() {
       width: 74,
       height: 105,
     },
+    {
+      name: "DL",
+      width: 99,
+      height: 210,
+    },
   ];
 
   useEffect(() => {
-    setRescaleToWidth(
-      (currentPageWithBleedWidth * newPageFinishSizeWidth) /
-        currentPageFinishSizeWidth
-    );
-    setRescaleToHeight(
-      (currentPageWithBleedHeight * newPageFinishSizeHeight) /
-        currentPageFinishSizeHeight
-    );
-    setTrimboxSizeWidth((rescaleToWidth - newPageFinishSizeWidth) / 2);
-    setTrimboxSizeHeight((rescaleToHeight - newPageFinishSizeHeight) / 2);
+    setRescaleTo({
+      width:
+        (currentPageWithBleed.width * newPageFinishSize.width) /
+        currentPageFinishSize.width,
+      height:
+        (currentPageWithBleed.height * newPageFinishSize.height) /
+        currentPageFinishSize.height,
+    });
+    setTrimboxSize({
+      width: (rescaleTo.width - newPageFinishSize.width) / 2,
+      height: (rescaleTo.height - newPageFinishSize.height) / 2,
+    });
   }, [
-    currentPageWithBleedWidth,
-    currentPageWithBleedHeight,
-    currentPageFinishSizeWidth,
-    currentPageFinishSizeHeight,
-    newPageFinishSizeWidth,
-    newPageFinishSizeHeight,
-    rescaleToWidth,
-    rescaleToHeight,
+    currentPageWithBleed,
+    newPageFinishSize,
+    currentPageFinishSize,
+    rescaleTo,
   ]);
+
+  useEffect(() => {
+    lookForStandardPaper("currentPage");
+  }, [currentPageFinishSize]);
+
+  useEffect(() => {
+    lookForStandardPaper("newPage");
+  }, [newPageFinishSize]);
 
   function handleSelect(selectOption: string, optionValue: string) {
     if (optionValue === "custom") {
@@ -94,11 +108,65 @@ export default function Main() {
       return;
     }
     if (selectOption === "currentPage") {
-      setCurrentPageFinishSizeWidth(selectedPaper.width);
-      setCurrentPageFinishSizeHeight(selectedPaper.height);
+      setCurrentPageFinishSize({
+        width: selectedPaper.width,
+        height: selectedPaper.height,
+      });
     } else if (selectOption === "newPage") {
-      setNewPageFinishSizeWidth(selectedPaper.width);
-      setNewPageFinishSizeHeight(selectedPaper.height);
+      setNewPageFinishSize({
+        width: selectedPaper.width,
+        height: selectedPaper.height,
+      });
+    }
+  }
+
+  function lookForStandardPaper(selector: string) {
+    const selectedPaper = standardSizes.find((paper) => {
+      if (selector === "currentPage") {
+        return (
+          paper.width === currentPageFinishSize.width &&
+          paper.height === currentPageFinishSize.height
+        );
+      } else {
+        return (
+          paper.width === newPageFinishSize.width &&
+          paper.height === newPageFinishSize.height
+        );
+      }
+    });
+
+    if (!selectedPaper) {
+      if (selector === "currentPage") {
+        setCurrentPageSelection("custom");
+      } else {
+        setNewPageSelection("custom");
+      }
+      return;
+    }
+
+    if (selector === "currentPage") {
+      setCurrentPageSelection(selectedPaper.name);
+    } else {
+      setNewPageSelection(selectedPaper.name);
+    }
+  }
+
+  function swapDimensions(sizeToSwap: string) {
+    if (sizeToSwap === "currentWithBleed") {
+      setCurrentPageWithBleed({
+        width: currentPageWithBleed.height,
+        height: currentPageWithBleed.width,
+      });
+    } else if (sizeToSwap === "currentPage") {
+      setCurrentPageFinishSize({
+        width: currentPageFinishSize.height,
+        height: currentPageFinishSize.width,
+      });
+    } else if (sizeToSwap === "newPage") {
+      setNewPageFinishSize({
+        width: newPageFinishSize.height,
+        height: newPageFinishSize.width,
+      });
     }
   }
 
@@ -109,21 +177,36 @@ export default function Main() {
         <span>Current Page with Bleed</span>
         <input
           type="number"
-          value={currentPageWithBleedWidth}
-          onChange={(e) => setCurrentPageWithBleedWidth(Number(e.target.value))}
+          value={currentPageWithBleed.width}
+          onChange={(e) =>
+            setCurrentPageWithBleed({
+              ...currentPageWithBleed,
+              width: Number(e.target.value),
+            })
+          }
         />
         <input
           type="number"
-          value={currentPageWithBleedHeight}
+          value={currentPageWithBleed.height}
           onChange={(e) =>
-            setCurrentPageWithBleedHeight(Number(e.target.value))
+            setCurrentPageWithBleed({
+              ...currentPageWithBleed,
+              height: Number(e.target.value),
+            })
           }
         />
+        <button onClick={(e) => swapDimensions("currentWithBleed")}>
+          Portrait to Landscape
+        </button>
       </label>
       <label>
         <span>Current Page Finish Size</span>
         <select
-          onChange={(event) => handleSelect("currentPage", event.target.value)}
+          value={currentPageSelection}
+          onChange={(event) => {
+            handleSelect("currentPage", event.target.value);
+            setCurrentPageSelection(event.target.value);
+          }}
         >
           <option value="custom">Custom</option>
           {standardSizes.map((paper) => {
@@ -136,23 +219,36 @@ export default function Main() {
         </select>
         <input
           type="number"
-          value={currentPageFinishSizeWidth}
-          onChange={(e) =>
-            setCurrentPageFinishSizeWidth(Number(e.target.value))
-          }
+          value={currentPageFinishSize.width}
+          onChange={(e) => {
+            setCurrentPageFinishSize({
+              ...currentPageFinishSize,
+              width: Number(e.target.value),
+            });
+          }}
         />
         <input
           type="number"
-          value={currentPageFinishSizeHeight}
-          onChange={(e) =>
-            setCurrentPageFinishSizeHeight(Number(e.target.value))
-          }
+          value={currentPageFinishSize.height}
+          onChange={(e) => {
+            setCurrentPageFinishSize({
+              ...currentPageFinishSize,
+              height: Number(e.target.value),
+            });
+          }}
         />
+        <button onClick={(e) => swapDimensions("currentPage")}>
+          Portrait to Landscape
+        </button>
       </label>
       <label>
         <span>New Finish Size</span>
         <select
-          onChange={(event) => handleSelect("newPage", event.target.value)}
+          value={newPageSelection}
+          onChange={(event) => {
+            handleSelect("newPage", event.target.value);
+            setNewPageSelection(event.target.value);
+          }}
         >
           <option value="custom">Custom</option>
           {standardSizes.map((paper) => {
@@ -165,24 +261,37 @@ export default function Main() {
         </select>
         <input
           type="number"
-          value={newPageFinishSizeWidth}
-          onChange={(e) => setNewPageFinishSizeWidth(Number(e.target.value))}
+          value={newPageFinishSize.width}
+          onChange={(e) => {
+            setNewPageFinishSize({
+              ...newPageFinishSize,
+              width: Number(e.target.value),
+            });
+          }}
         />
         <input
           type="number"
-          value={newPageFinishSizeHeight}
-          onChange={(e) => setNewPageFinishSizeHeight(Number(e.target.value))}
+          value={newPageFinishSize.height}
+          onChange={(e) => {
+            setNewPageFinishSize({
+              ...newPageFinishSize,
+              height: Number(e.target.value),
+            });
+          }}
         />
+        <button onClick={(e) => swapDimensions("newPage")}>
+          Portrait to Landscape
+        </button>
       </label>
       <label>
         <span>Rescale to</span>
-        <input value={rescaleToWidth} disabled />
-        <input value={rescaleToHeight} disabled />
+        <input value={rescaleTo.width.toFixed(2)} disabled />
+        <input value={rescaleTo.height.toFixed(2)} disabled />
       </label>
       <label>
         <span>Trimbox Sizes</span>
-        <input value={trimboxSizeWidth} disabled />
-        <input value={trimboxSizeHeight} disabled />
+        <input value={trimboxSize.width.toFixed(2)} disabled />
+        <input value={trimboxSize.height.toFixed(2)} disabled />
       </label>
     </main>
   );
