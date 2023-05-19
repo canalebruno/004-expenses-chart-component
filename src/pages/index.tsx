@@ -7,7 +7,6 @@ const Home: NextPage = () => {
   return (
     <div className={styles.maxContainer}>
       <div className={styles.container}>
-        <Header />
         <Main />
       </div>
     </div>
